@@ -40,7 +40,7 @@ public class CliTest {
 
   @Test
   public void should_extract_properties() {
-    cli.parse(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    cli.parse(new String[]{"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(cli.properties().get("foo")).isEqualTo("bar");
     assertThat(cli.properties().get("hello")).isEqualTo("world");
     assertThat(cli.properties().get("boolean")).isEqualTo("true");
@@ -50,61 +50,61 @@ public class CliTest {
   public void should_fail_on_missing_prop() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[] {"-D"});
-    verify(logs).error("Missing argument for option -D/--define");
+    cli.parse(new String[]{"-D"});
+    verify(logs).error("Missing argument for option -D");
     verify(exit).exit(Exit.ERROR);
   }
 
   @Test
   public void should_not_fail_with_errors_option() {
-    cli.parse(new String[] {"-e"});
+    cli.parse(new String[]{"-e"});
   }
 
   @Test
   public void should_parse_optional_task() {
-    cli.parse(new String[] {"-D", "foo=bar"});
+    cli.parse(new String[]{"-D", "foo=bar"});
     assertThat(cli.properties().get("sonar.task")).isNull();
 
-    cli.parse(new String[] {"views", "-D", "foo=bar"});
+    cli.parse(new String[]{"views", "-D", "foo=bar"});
     assertThat(cli.properties().get("sonar.task")).isEqualTo("views");
   }
 
   @Test
   public void should_enable_debug_mode() {
-    cli.parse(new String[] {"-X"});
+    cli.parse(new String[]{"-X"});
     assertThat(cli.isDebugEnabled()).isTrue();
     assertThat(cli.properties().get("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
   public void should_enable_debug_mode_full() {
-    cli.parse(new String[] {"--debug"});
+    cli.parse(new String[]{"--debug"});
     assertThat(cli.isDebugEnabled()).isTrue();
     assertThat(cli.properties().get("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
   public void should_show_version() {
-    cli.parse(new String[] {"-v"});
+    cli.parse(new String[]{"-v"});
     assertThat(cli.isDisplayVersionOnly()).isTrue();
   }
 
   @Test
   public void should_show_version_full() {
-    cli.parse(new String[] {"--version"});
+    cli.parse(new String[]{"--version"});
     assertThat(cli.isDisplayVersionOnly()).isTrue();
   }
 
   @Test
   public void should_enable_stacktrace_log() {
-    cli.parse(new String[] {"-e"});
+    cli.parse(new String[]{"-e"});
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
 
   @Test
   public void should_enable_stacktrace_log_full() {
-    cli.parse(new String[] {"--errors"});
+    cli.parse(new String[]{"--errors"});
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
@@ -120,7 +120,7 @@ public class CliTest {
   public void should_show_usage() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[] {"-h"});
+    cli.parse(new String[]{"-h"});
     verify(logs).info("usage: sonar-scanner [options]");
     verify(exit).exit(Exit.SUCCESS);
   }
@@ -129,7 +129,7 @@ public class CliTest {
   public void should_show_usage_full() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[] {"--help"});
+    cli.parse(new String[]{"--help"});
     verify(logs).info("usage: sonar-scanner [options]");
     verify(exit).exit(Exit.SUCCESS);
   }
@@ -138,7 +138,7 @@ public class CliTest {
   public void should_show_usage_on_bad_syntax() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[] {"-w"});
+    cli.parse(new String[]{"-w"});
     verify(logs).error("Unrecognized option: -w");
     verify(logs).info("usage: sonar-scanner [options]");
     verify(exit).exit(Exit.ERROR);
@@ -148,7 +148,7 @@ public class CliTest {
   public void should_set_allowed_loglevel_with_l_parameter_correctly() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[]{"-l INFO"});
+    cli.parse(new String[]{"-l", "INFO"});
     verify(logs).setLogLevel(Logs.LogLevel.INFO);
   }
 
@@ -156,7 +156,7 @@ public class CliTest {
   public void should_set_allowed_loglevel_with_loglevel_parameter_correctly() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[]{"--loglevel ERROR"});
+    cli.parse(new String[]{"--loglevel", "ERROR"});
     verify(logs).setLogLevel(Logs.LogLevel.ERROR);
   }
 
@@ -164,7 +164,7 @@ public class CliTest {
   public void should_exit_with_error_if_loglevel_is_unknown() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
-    cli.parse(new String[]{"--loglevel UNKNOWN"});
+    cli.parse(new String[]{"--loglevel", "UNKNOWN"});
     verify(exit).exit(Exit.ERROR);
   }
 }

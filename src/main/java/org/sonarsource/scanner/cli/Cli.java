@@ -19,22 +19,37 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.util.Properties;
 import org.sonarsource.scanner.api.ScannerProperties;
+
+import java.util.Properties;
 
 import static java.util.Arrays.asList;
 
 class Cli {
 
-  private boolean debugEnabled = false;
-  private boolean displayVersionOnly = false;
   private final Properties props = new Properties();
   private final Exit exit;
   private final Logs logger;
+  private boolean debugEnabled = false;
+  private boolean displayVersionOnly = false;
 
   public Cli(Exit exit, Logs logger) {
     this.exit = exit;
     this.logger = logger;
+  }
+
+  private static void appendPropertyTo(String arg, Properties props) {
+    final String key;
+    final String value;
+    int j = arg.indexOf('=');
+    if (j == -1) {
+      key = arg;
+      value = "true";
+    } else {
+      key = arg.substring(0, j);
+      value = arg.substring(j + 1);
+    }
+    props.setProperty(key, value);
   }
 
   boolean isDebugEnabled() {
@@ -83,18 +98,24 @@ class Cli {
       logger.setShowTimestamp(true);
 
     } else if (arg.startsWith("-l") || arg.startsWith("--loglevel")) {
-      String logLevelStr = arg.substring(arg.split("\\s")[0].length()).trim();
-      try {
-        logger.setLogLevel(Logs.LogLevel.valueOf(logLevelStr));
-      } catch (IllegalArgumentException e) {
-        logger.info("'" + logLevelStr + "' is not a supported loglevel");
-        exit.exit(Exit.ERROR);
+      if (args.length > pos + 1) {
+        String logLevelStr = args[pos + 1].trim();
+        try {
+          logger.setLogLevel(Logs.LogLevel.valueOf(logLevelStr));
+        } catch (IllegalArgumentException e) {
+          logger.info("'" + logLevelStr + "' is not a supported loglevel");
+          exit.exit(Exit.ERROR);
+        }
+        return pos + 2;
       }
-
     } else if (asList("-D", "--define").contains(arg)) {
-      return processProp(args, pos);
-
-    } else if (arg.startsWith("-D")) {
+      if (args.length > pos + 1) {
+        appendPropertyTo(args[pos + 1], props);
+      } else {
+        printErrorAndExit("Missing argument for option " + args[pos]);
+      }
+      return pos + 2;
+    } else if (arg.startsWith("-D") && arg.length() > 2) {
       arg = arg.substring(2);
       appendPropertyTo(arg, props);
 
@@ -104,34 +125,10 @@ class Cli {
     return pos + 1;
   }
 
-  private int processProp(String[] args, int pos) {
-    int valuePos = pos + 1;
-    if (valuePos >= args.length) {
-      printErrorAndExit("Missing argument for option -D/--define");
-    } else {
-      appendPropertyTo(args[valuePos], props);
-    }
-    return valuePos + 1;
-  }
-
   private void reset() {
     props.clear();
     debugEnabled = false;
     displayVersionOnly = false;
-  }
-
-  private static void appendPropertyTo(String arg, Properties props) {
-    final String key;
-    final String value;
-    int j = arg.indexOf('=');
-    if (j == -1) {
-      key = arg;
-      value = "true";
-    } else {
-      key = arg.substring(0, j);
-      value = arg.substring(j + 1);
-    }
-    props.setProperty(key, value);
   }
 
   private void printErrorAndExit(String message) {
